@@ -50,6 +50,7 @@ public class Dictionary {
    * @return The closests words to word, sorted by ascending levenshtein distance
    */
   public List<String> closestWords(String word) {
+    // We select words that have at least one trigram in common
     HashMap<String, Integer> firstSelection = new HashMap<>();
     for (int i = 0; i < word.length() - 2; i++) {
       String trigram = word.substring(i, i + 3);
@@ -61,12 +62,18 @@ public class Dictionary {
         firstSelection.put(w, n == null ? 1 : n + 1);
       }
     }
+
+    // We select the words that have the most trigrams in common
     List<String> closeWords = new ArrayList<>(firstSelection.keySet());
+    closeWords.removeIf(w -> firstSelection.get(w) < 2);
     closeWords.sort((a, b) -> firstSelection.get(b) - firstSelection.get(a));
     closeWords = closeWords.stream().limit(100).collect(Collectors.toList());
+
+    // We compute the levenshtein distance for each selected word
     Map<String, Integer> levenshteinDistances = new HashMap<>();
     for (String w : closeWords)
       levenshteinDistances.put(w, levenshtein.distance(word, w));
+
     closeWords.sort((a, b) -> levenshteinDistances.get(a) - levenshteinDistances.get(b));
     return closeWords;
   }
