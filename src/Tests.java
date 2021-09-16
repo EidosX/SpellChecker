@@ -1,12 +1,36 @@
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Scanner;
+
+import dictionary.Dictionary;
 import levenshtein.*;
 
 public class Tests {
-  public static void main(String[] args) {
-    timer(10000, () -> testLevenshtein(new WagnerFischerLevenshtein()), "WagnerFischerLevenshtein");
-    timer(10000, () -> testLevenshtein(new GithubCopilotLevenshtein()), "GithubCopilotLevenshtein");
-    timer(10000, () -> testLevenshtein(new TwoRowsLevenshtein()), "TwoRowsLevenshtein");
-    timer(10000, () -> testLevenshtein(new GithubCopilot2Levenshtein()), "GithubCopilot2Levenshtein");
-    timer(10000, () -> testLevenshtein(new NaiveLevenshtein()), "NaiveLevenshtein");
+  public static void main(String[] args) throws IOException {
+    // timer(10000, () -> testLevenshtein(new WagnerFischerLevenshtein()),
+    // "WagnerFischerLevenshtein");
+    // timer(10000, () -> testLevenshtein(new GithubCopilotLevenshtein()),
+    // "GithubCopilotLevenshtein");
+    // timer(10000, () -> testLevenshtein(new TwoRowsLevenshtein()),
+    // "TwoRowsLevenshtein");
+    // timer(10000, () -> testLevenshtein(new GithubCopilot2Levenshtein()),
+    // "GithubCopilot2Levenshtein");
+    // timer(10000, () -> testLevenshtein(new NaiveLevenshtein()),
+    // "NaiveLevenshtein");
+
+    String[] misspelledWords = Files.lines(new File("assets/fautes.txt").toPath()).toArray(String[]::new);
+
+    Levenshtein levenshtein = new WagnerFischerLevenshtein();
+    Scanner scanner = new Scanner(new File("assets/dico.txt"));
+    Dictionary dictionary = new Dictionary(scanner, levenshtein);
+    timer(1, () -> {
+      for (String word : misspelledWords) {
+        if (!dictionary.exists(word)) {
+          dictionary.closestWords(word);
+        }
+      }
+    }, "fautes.txt Correction");
   }
 
   public static void testLevenshtein(Levenshtein levenshtein) {
