@@ -7,4 +7,11 @@ public class MathTools {
       min = Math.min(min, val);
     return min;
   }
+
+  public static int max(int x, int... xs) {
+    int max = x;
+    for (int val : xs)
+      max = Math.max(max, val);
+    return max;
+  }
 }
