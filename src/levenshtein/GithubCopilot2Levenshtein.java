@@ -10,6 +10,11 @@ public class GithubCopilot2Levenshtein implements Levenshtein {
     int n = s.length();
     int m = t.length();
 
+    if (n == 0)
+      return m;
+    if (m == 0)
+      return n;
+
     // Create two work vectors of integer distances.
     int[] v0 = new int[m + 1];
     int[] v1 = new int[m + 1];

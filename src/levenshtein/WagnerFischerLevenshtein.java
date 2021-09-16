@@ -5,6 +5,10 @@ import static tools.MathTools.*;
 public class WagnerFischerLevenshtein implements Levenshtein {
   @Override
   public int distance(CharSequence str1, CharSequence str2) {
+    if (str1.length() == 0)
+      return str2.length();
+    if (str2.length() == 0)
+      return str1.length();
     int[][] distances = new int[str2.length()][str1.length()];
     for (int j = 0; j < str2.length(); ++j) {
       for (int i = 0; i < str1.length(); ++i) {

@@ -5,6 +5,11 @@ import static tools.MathTools.*;
 public class TwoRowsLevenshtein implements Levenshtein {
   @Override
   public int distance(CharSequence str1, CharSequence str2) {
+    if (str1.length() == 0)
+      return str2.length();
+    if (str2.length() == 0)
+      return str1.length();
+
     int[] distances = new int[str1.length()];
     int[] temp = new int[str1.length()];
 

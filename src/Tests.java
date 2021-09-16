@@ -16,6 +16,9 @@ public class Tests {
     assertEquals(levenshtein.distance("algorithmique", "logarytmique"), 5);
     assertEquals(levenshtein.distance("gily", "geely"), 2);
     assertEquals(levenshtein.distance("honda", "hyundai"), 3);
+    assertEquals(levenshtein.distance("", "hyundai"), 7);
+    assertEquals(levenshtein.distance("a", "hyundai"), 6);
+    assertEquals(levenshtein.distance("ab", "hyundai"), 6);
   }
 
   public static void assertEquals(Object o1, Object o2) {
