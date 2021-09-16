@@ -8,22 +8,22 @@ import levenshtein.*;
 
 public class Tests {
   public static void main(String[] args) throws IOException {
-    // timer(10000, () -> testLevenshtein(new WagnerFischerLevenshtein()),
-    // "WagnerFischerLevenshtein");
-    // timer(10000, () -> testLevenshtein(new GithubCopilotLevenshtein()),
-    // "GithubCopilotLevenshtein");
-    // timer(10000, () -> testLevenshtein(new TwoRowsLevenshtein()),
-    // "TwoRowsLevenshtein");
-    // timer(10000, () -> testLevenshtein(new GithubCopilot2Levenshtein()),
-    // "GithubCopilot2Levenshtein");
-    // timer(10000, () -> testLevenshtein(new NaiveLevenshtein()),
-    // "NaiveLevenshtein");
+    timer(60000, () -> testLevenshtein(new WagnerFischerLevenshtein()), "WagnerFischerLevenshtein");
+    timer(60000, () -> testLevenshtein(new GithubCopilotLevenshtein()), "GithubCopilotLevenshtein");
+    timer(60000, () -> testLevenshtein(new TwoRowsLevenshtein()), "TwoRowsLevenshtein");
+    timer(60000, () -> testLevenshtein(new GithubCopilot2Levenshtein()), "GithubCopilot2Levenshtein");
+    timer(1000, () -> testLevenshtein(new NaiveLevenshtein()), "NaiveLevenshtein");
 
     String[] misspelledWords = Files.lines(new File("assets/fautes.txt").toPath()).toArray(String[]::new);
 
     Levenshtein levenshtein = new WagnerFischerLevenshtein();
     Scanner scanner = new Scanner(new File("assets/dico.txt"));
     Dictionary dictionary = new Dictionary(scanner, levenshtein);
+
+    assertEquals(dictionary.closestWords("rémmencherais").get(0), "remmancherais");
+    assertEquals(dictionary.closestWords("symetrisserait").get(0), "symétriserait");
+    assertEquals(dictionary.closestWords("shasser-croisé").get(0), "chassé-croisé");
+
     timer(1, () -> {
       for (String word : misspelledWords) {
         if (!dictionary.exists(word)) {
@@ -45,7 +45,7 @@ public class Tests {
     assertEquals(levenshtein.distance("ab", "hyundai"), 6);
   }
 
-  public static void assertEquals(Object o1, Object o2) {
+  public static <T> void assertEquals(T o1, T o2) {
     if (!o1.equals(o2))
       throw new AssertionError(o1 + " != " + o2);
   }
@@ -55,6 +55,7 @@ public class Tests {
     for (int i = 0; i < repetitions; ++i)
       r.run();
     time = System.nanoTime() - time;
-    System.out.println(name + " ran in " + time / 1000000 + "ms");
+    System.out.println(time / repetitions / 1000000. + "ms ("
+        + (repetitions > 1 ? "average on " + repetitions + ", " : "") + name + ")");
   }
 }
