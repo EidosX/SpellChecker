@@ -1,15 +1,12 @@
-import levenshtein.GithubCopilotLevenshtein;
-import levenshtein.Levenshtein;
-import levenshtein.NaiveLevenshtein;
-import levenshtein.TwoRowsLevenshtein;
-import levenshtein.WagnerFischerLevenshtein;
+import levenshtein.*;
 
 public class Tests {
   public static void main(String[] args) {
-    testLevenshtein(new NaiveLevenshtein());
-    testLevenshtein(new WagnerFischerLevenshtein());
-    testLevenshtein(new TwoRowsLevenshtein());
-    testLevenshtein(new GithubCopilotLevenshtein());
+    timer(10000, () -> testLevenshtein(new WagnerFischerLevenshtein()), "WagnerFischerLevenshtein");
+    timer(10000, () -> testLevenshtein(new GithubCopilotLevenshtein()), "GithubCopilotLevenshtein");
+    timer(10000, () -> testLevenshtein(new TwoRowsLevenshtein()), "TwoRowsLevenshtein");
+    timer(10000, () -> testLevenshtein(new GithubCopilot2Levenshtein()), "GithubCopilot2Levenshtein");
+    timer(10000, () -> testLevenshtein(new NaiveLevenshtein()), "NaiveLevenshtein");
   }
 
   public static void testLevenshtein(Levenshtein levenshtein) {
@@ -24,5 +21,13 @@ public class Tests {
   public static void assertEquals(Object o1, Object o2) {
     if (!o1.equals(o2))
       throw new AssertionError(o1 + " != " + o2);
+  }
+
+  public static void timer(int repetitions, Runnable r, String name) {
+    long time = System.nanoTime();
+    for (int i = 0; i < repetitions; ++i)
+      r.run();
+    time = System.nanoTime() - time;
+    System.out.println(name + " ran in " + time / 1000000 + "ms");
   }
 }
