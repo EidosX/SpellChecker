@@ -8,21 +8,22 @@ import levenshtein.*;
 
 public class Tests {
   public static void main(String[] args) throws IOException {
-    timer(60000, () -> testLevenshtein(new WagnerFischerLevenshtein()), "WagnerFischerLevenshtein");
-    timer(60000, () -> testLevenshtein(new GithubCopilotLevenshtein()), "GithubCopilotLevenshtein");
-    timer(60000, () -> testLevenshtein(new TwoRowsLevenshtein()), "TwoRowsLevenshtein");
-    timer(60000, () -> testLevenshtein(new GithubCopilot2Levenshtein()), "GithubCopilot2Levenshtein");
+    timer(600000, () -> testLevenshtein(new WagnerFischerLevenshtein()), "WagnerFischerLevenshtein");
+    timer(600000, () -> testLevenshtein(new GithubCopilotLevenshtein()), "GithubCopilotLevenshtein");
+    timer(600000, () -> testLevenshtein(new TwoRowsLevenshtein()), "TwoRowsLevenshtein");
+    timer(600000, () -> testLevenshtein(new GithubCopilot2Levenshtein()), "GithubCopilot2Levenshtein");
     timer(1000, () -> testLevenshtein(new NaiveLevenshtein()), "NaiveLevenshtein");
 
     String[] misspelledWords = Files.lines(new File("assets/fautes.txt").toPath()).toArray(String[]::new);
 
-    Levenshtein levenshtein = new WagnerFischerLevenshtein();
+    Levenshtein levenshtein = new TwoRowsLevenshtein();
     Scanner scanner = new Scanner(new File("assets/dico.txt"));
     Dictionary dictionary = new Dictionary(scanner, levenshtein);
 
     assertEquals(dictionary.closestWords("rémmencherais").get(0), "remmancherais");
     assertEquals(dictionary.closestWords("symetrisserait").get(0), "symétriserait");
     assertEquals(dictionary.closestWords("shasser-croisé").get(0), "chassé-croisé");
+    assertEquals(dictionary.closestWords("oeuvreriez").get(0), "œuvreriez");
 
     timer(1, () -> {
       for (String word : misspelledWords) {
