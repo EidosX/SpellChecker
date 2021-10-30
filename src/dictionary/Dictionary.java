@@ -25,7 +25,7 @@ public class Dictionary {
       String word = scanner.next();
       words.add(word);
       for (int i = 0; i < word.length() - 2; i++) {
-        String trigram = replaceSpecialChars(word.substring(i, i + 3));
+        String trigram = word.substring(i, i + 3);
         if (trigramMap.containsKey(trigram)) {
           trigramMap.get(trigram).add(word);
         } else {
@@ -50,8 +50,6 @@ public class Dictionary {
    * @return The closests words to word, sorted by ascending levenshtein distance
    */
   public List<String> closestWords(String word) {
-    word = replaceSpecialChars(word);
-
     // We select words that have at least one trigram in common
     HashMap<String, Integer> firstSelection = new HashMap<>();
     for (int i = 0; i < word.length() - 2; i++) {
@@ -74,19 +72,9 @@ public class Dictionary {
     // We compute the levenshtein distance for each selected word
     Map<String, Integer> levenshteinDistances = new HashMap<>();
     for (String w : closeWords)
-      levenshteinDistances.put(w, levenshtein.distance(word, replaceSpecialChars(w)));
+      levenshteinDistances.put(w, levenshtein.distance(word, w));
 
     closeWords.sort((a, b) -> levenshteinDistances.get(a) - levenshteinDistances.get(b));
     return closeWords;
-  }
-
-  private String replaceSpecialChars(String str) {
-    str = str.replace("é", "e");
-    str = str.replace("è", "e");
-    str = str.replace("œ", "oe");
-    str = str.replace("ù", "u");
-    str = str.replace("î", "i");
-    str = str.replace("â", "a");
-    return str;
   }
 }
