@@ -24,8 +24,10 @@ public class Dictionary {
     while (scanner.hasNext()) {
       String word = scanner.next();
       words.add(word);
-      for (int i = 0; i < word.length() - 2; i++) {
-        String trigram = word.substring(i, i + 3);
+      var wordWithDelimiters = "<" + word + ">";
+
+      for (int i = 0; i < wordWithDelimiters.length() - 2; i++) {
+        String trigram = wordWithDelimiters.substring(i, i + 3);
         if (trigramMap.containsKey(trigram)) {
           trigramMap.get(trigram).add(word);
         } else {
@@ -50,10 +52,12 @@ public class Dictionary {
    * @return The closests words to word, sorted by ascending levenshtein distance
    */
   public List<String> closestWords(String word) {
+    var wordWithDelimiters = "<" + word + ">";
+
     // We select words that have at least one trigram in common
     HashMap<String, Integer> firstSelection = new HashMap<>();
-    for (int i = 0; i < word.length() - 2; i++) {
-      String trigram = word.substring(i, i + 3);
+    for (int i = 0; i < wordWithDelimiters.length() - 2; i++) {
+      String trigram = wordWithDelimiters.substring(i, i + 3);
       Set<String> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
