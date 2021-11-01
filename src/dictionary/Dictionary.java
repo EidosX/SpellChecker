@@ -13,7 +13,7 @@ import levenshtein.Levenshtein;
 
 public class Dictionary {
   private Set<String> words;
-  private Map<String, Set<String>> trigramMap;
+  private Map<String, List<String>> trigramMap;
 
   private Levenshtein levenshtein;
 
@@ -24,14 +24,15 @@ public class Dictionary {
     while (scanner.hasNext()) {
       String word = scanner.next();
       words.add(word);
-      var wordWithDelimiters = "<" + word + ">";
+      var trigramWord = transformForTrigrams(word);
 
-      for (int i = 0; i < wordWithDelimiters.length() - 2; i++) {
-        String trigram = wordWithDelimiters.substring(i, i + 3);
+      for (int i = 0; i < trigramWord.length() - 2; i++) {
+        String trigram = trigramWord.substring(i, i + 3);
         if (trigramMap.containsKey(trigram)) {
           trigramMap.get(trigram).add(word);
         } else {
-          Set<String> words = new HashSet<>();
+          ArrayList<String> words = new ArrayList<>();
+          words.ensureCapacity(16);
           words.add(word);
           trigramMap.put(trigram, words);
         }
@@ -52,13 +53,13 @@ public class Dictionary {
    * @return The closests words to word, sorted by ascending levenshtein distance
    */
   public List<String> closestWords(String word) {
-    var wordWithDelimiters = "<" + word + ">";
+    var trigramWord = transformForTrigrams(word);
 
     // We select words that have at least one trigram in common
     HashMap<String, Integer> firstSelection = new HashMap<>();
-    for (int i = 0; i < wordWithDelimiters.length() - 2; i++) {
-      String trigram = wordWithDelimiters.substring(i, i + 3);
-      Set<String> matchingWithTrigram = trigramMap.get(trigram);
+    for (int i = 0; i < trigramWord.length() - 2; i++) {
+      String trigram = trigramWord.substring(i, i + 3);
+      List<String> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
       for (String w : matchingWithTrigram) {
@@ -80,5 +81,9 @@ public class Dictionary {
 
     closeWords.sort((a, b) -> levenshteinDistances.get(a) - levenshteinDistances.get(b));
     return closeWords;
+  }
+
+  private String transformForTrigrams(String word) {
+    return "<" + word + ">";
   }
 }
