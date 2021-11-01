@@ -56,22 +56,24 @@ public class Dictionary {
 
     // We count how many common trigrams there are between the word and those in the
     // dictionary
-    HashMap<String, Integer> trigramOccs = new HashMap<>();
+    Map<String, Integer> trigramOccs = new HashMap<>(64000);
     for (int i = 0; i < trigramWord.length() - 2; i++) {
       String trigram = trigramWord.substring(i, i + 3);
       List<String> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
-      for (String w : matchingWithTrigram)
+      for (String w : matchingWithTrigram) {
         trigramOccs.compute(w, (s, n) -> n == null ? 1 : n + 1);
+      }
     }
 
     // We select the words that have the most trigrams in common
-    Queue<String> withMostCommonTrigrams = new PriorityQueue<>(100,
+    final int MCTSelectionCount = 100;
+    Queue<String> withMostCommonTrigrams = new PriorityQueue<>(MCTSelectionCount,
         (a, b) -> trigramOccs.get(a).compareTo(trigramOccs.get(b)));
 
     for (String w : trigramOccs.keySet()) {
-      if (withMostCommonTrigrams.size() < 100) {
+      if (withMostCommonTrigrams.size() < MCTSelectionCount) {
         withMostCommonTrigrams.add(w);
       } else {
         String min = withMostCommonTrigrams.peek();
@@ -85,7 +87,7 @@ public class Dictionary {
     List<String> closestWords = new ArrayList<>(withMostCommonTrigrams);
 
     // We compute the levenshtein distance for each selected word
-    Map<String, Integer> levDists = new HashMap<>(100);
+    Map<String, Integer> levDists = new HashMap<>(MCTSelectionCount);
     for (String w : closestWords)
       levDists.put(w, levenshtein.distance(word, w));
 

@@ -7,20 +7,20 @@ import java.util.stream.Collectors;
 
 import dictionary.Dictionary;
 import levenshtein.Levenshtein;
-import levenshtein.WagnerFischerLevenshtein;
+import levenshtein.TwoRowsLevenshtein;
 
 public class FautesTxt {
   public static void main(String[] args) throws IOException, InterruptedException {
     String[] misspelledWords = Files.lines(new File("assets/fautes.txt").toPath()).toArray(String[]::new);
 
-    Levenshtein levenshtein = new WagnerFischerLevenshtein();
+    Levenshtein levenshtein = new TwoRowsLevenshtein();
     Scanner scanner = new Scanner(new File("assets/dico.txt"));
 
     Dictionary dictionary = new Dictionary(scanner, levenshtein);
 
     @SuppressWarnings("unchecked")
     List<String>[] correctedWords = new List[misspelledWords.length];
-    Thread[] threads = new Thread[20];
+    Thread[] threads = new Thread[12];
 
     long t = System.nanoTime();
 
