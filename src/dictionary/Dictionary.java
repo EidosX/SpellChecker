@@ -1,6 +1,7 @@
 package dictionary;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -88,20 +89,27 @@ public class Dictionary {
 
     // We compute the levenshtein distance for each selected word
     Map<String, Integer> levDists = new HashMap<>(MCTSelectionCount);
+    word = transformForLev(word);
     for (String w : closestWords)
-      levDists.put(w, levenshtein.distance(word, w));
+      levDists.put(w, levenshtein.distance(word, transformForLev(w)));
 
-    closestWords.sort((a, b) -> levDists.get(a).compareTo(levDists.get(b)));
+    closestWords.sort(Comparator.comparing(levDists::get));
     return closestWords;
   }
 
   private String transformForTrigrams(String word) {
+    word = transformForLev(word);
     word = word.toLowerCase();
     word = word.replace("é", "e");
     word = word.replace("è", "e");
     word = word.replace("û", "u");
-    word = word.replace("œ", "oe");
     word = word.replace("ô", "o");
-    return "<" + word + ">";
+    word = "<" + word + ">";
+    return word;
+  }
+
+  private String transformForLev(String word) {
+    word = word.replace("œ", "oe");
+    return word;
   }
 }
