@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import dictionary.Dictionary;
 import levenshtein.*;
@@ -27,7 +28,8 @@ public class Tests {
     timer(1, () -> {
       for (String word : misspelledWords) {
         if (!dictionary.exists(word)) {
-          dictionary.closestWords(word);
+          var xs = dictionary.closestWords(word);
+          System.out.println(word + " -> " + xs.stream().limit(5).collect(Collectors.toList()));
         }
       }
     }, "fautes.txt Correction");
