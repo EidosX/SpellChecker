@@ -13,15 +13,13 @@ import java.util.Set;
 import levenshtein.Levenshtein;
 
 public class Dictionary {
-  private Set<String> words;
-  private Map<String, List<String>> trigramMap;
+  private Set<String> words = new HashSet<String>(100000);
+  private Map<String, List<String>> trigramMap = new HashMap<>(100000);
 
   private Levenshtein levenshtein;
 
   public Dictionary(Scanner scanner, Levenshtein levenshtein) {
     this.levenshtein = levenshtein;
-    this.words = new HashSet<String>();
-    this.trigramMap = new HashMap<>();
     while (scanner.hasNext()) {
       String word = scanner.next();
       words.add(word);
@@ -32,10 +30,10 @@ public class Dictionary {
         if (trigramMap.containsKey(trigram)) {
           trigramMap.get(trigram).add(word);
         } else {
-          ArrayList<String> words = new ArrayList<>();
-          words.ensureCapacity(16);
-          words.add(word);
-          trigramMap.put(trigram, words);
+          ArrayList<String> ws = new ArrayList<>(16);
+          ws.ensureCapacity(16);
+          ws.add(word);
+          trigramMap.put(trigram, ws);
         }
       }
     }
