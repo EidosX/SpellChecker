@@ -70,7 +70,6 @@ public class Dictionary {
 
     // We select the words that have the most trigrams in common
     List<String> closeWords = new ArrayList<>(firstSelection.keySet());
-    closeWords.removeIf(w -> firstSelection.get(w) < 2);
     closeWords.sort((a, b) -> firstSelection.get(b) - firstSelection.get(a));
     closeWords = closeWords.stream().limit(100).collect(Collectors.toList());
 
@@ -84,6 +83,12 @@ public class Dictionary {
   }
 
   private String transformForTrigrams(String word) {
+    word = word.toLowerCase();
+    word = word.replace("é", "e");
+    word = word.replace("è", "e");
+    word = word.replace("û", "u");
+    word = word.replace("œ", "oe");
+    word = word.replace("ô", "o");
     return "<" + word + ">";
   }
 }
