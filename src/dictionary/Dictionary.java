@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,30 +58,41 @@ public class Dictionary {
     var trigramWord = transformForTrigrams(word);
 
     // We select words that have at least one trigram in common
-    HashMap<String, Integer> firstSelection = new HashMap<>();
+    HashMap<String, Integer> trigramOccs = new HashMap<>();
     for (int i = 0; i < trigramWord.length() - 2; i++) {
       String trigram = trigramWord.substring(i, i + 3);
       List<String> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
       for (String w : matchingWithTrigram) {
-        Integer n = firstSelection.get(w);
-        firstSelection.put(w, n == null ? 1 : n + 1);
+        Integer n = trigramOccs.get(w);
+        trigramOccs.put(w, n == null ? 1 : n + 1);
       }
     }
 
     // We select the words that have the most trigrams in common
-    List<String> closeWords = new ArrayList<>(firstSelection.keySet());
-    closeWords.sort((a, b) -> firstSelection.get(b) - firstSelection.get(a));
-    closeWords = closeWords.stream().limit(100).collect(Collectors.toList());
+    Queue<String> withMostCommonTrigrams = new PriorityQueue<>(100,
+        (a, b) -> trigramOccs.get(a).compareTo(trigramOccs.get(b)));
+
+    for (String w : trigramOccs.keySet()) {
+      if (withMostCommonTrigrams.size() < 100) {
+        withMostCommonTrigrams.add(w);
+      } else {
+        String min = withMostCommonTrigrams.peek();
+        if (trigramOccs.get(w) > trigramOccs.get(min)) {
+          withMostCommonTrigrams.poll();
+          withMostCommonTrigrams.add(w);
+        }
+      }
+    }
 
     // We compute the levenshtein distance for each selected word
-    Map<String, Integer> levenshteinDistances = new HashMap<>();
-    for (String w : closeWords)
-      levenshteinDistances.put(w, levenshtein.distance(word, w));
+    Map<String, Integer> levDists = new HashMap<>();
+    for (String w : withMostCommonTrigrams)
+      levDists.put(w, levenshtein.distance(word, w));
 
-    closeWords.sort((a, b) -> levenshteinDistances.get(a) - levenshteinDistances.get(b));
-    return closeWords;
+    return withMostCommonTrigrams.stream().sorted((a, b) -> levDists.get(a).compareTo(levDists.get(b)))
+        .collect(Collectors.toList());
   }
 
   private String transformForTrigrams(String word) {
