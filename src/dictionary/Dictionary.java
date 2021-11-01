@@ -83,12 +83,19 @@ public class Dictionary {
   }
 
   private String transformForTrigrams(String word) {
-    word = word.toLowerCase();
-    word = word.replace("é", "e");
-    word = word.replace("è", "e");
-    word = word.replace("û", "u");
-    word = word.replace("œ", "oe");
-    word = word.replace("ô", "o");
-    return "<" + word + ">";
+    StringBuilder sb = new StringBuilder(word.length() + 3);
+    sb.append('<');
+    for (int i = 0; i < word.length(); i++) {
+      char c = Character.toLowerCase(word.charAt(i));
+      c = c == 'é' || c == 'è' || c == 'ê' ? 'e' : c;
+      c = c == 'û' ? 'u' : c;
+      c = c == 'ô' ? 'o' : c;
+      if (c == 'œ')
+        sb.append("oe");
+      else
+        sb.append(c);
+    }
+    sb.append('>');
+    return sb.toString();
   }
 }
