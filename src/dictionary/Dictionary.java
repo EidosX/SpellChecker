@@ -9,7 +9,6 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import levenshtein.Levenshtein;
 
@@ -57,17 +56,16 @@ public class Dictionary {
   public List<String> closestWords(String word) {
     var trigramWord = transformForTrigrams(word);
 
-    // We select words that have at least one trigram in common
+    // We count how many common trigrams there are between the word and those in the
+    // dictionary
     HashMap<String, Integer> trigramOccs = new HashMap<>();
     for (int i = 0; i < trigramWord.length() - 2; i++) {
       String trigram = trigramWord.substring(i, i + 3);
       List<String> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
-      for (String w : matchingWithTrigram) {
-        Integer n = trigramOccs.get(w);
-        trigramOccs.put(w, n == null ? 1 : n + 1);
-      }
+      for (String w : matchingWithTrigram)
+        trigramOccs.compute(w, (s, n) -> n == null ? 1 : n + 1);
     }
 
     // We select the words that have the most trigrams in common
@@ -86,13 +84,15 @@ public class Dictionary {
       }
     }
 
+    List<String> closestWords = new ArrayList<>(withMostCommonTrigrams);
+
     // We compute the levenshtein distance for each selected word
-    Map<String, Integer> levDists = new HashMap<>();
-    for (String w : withMostCommonTrigrams)
+    Map<String, Integer> levDists = new HashMap<>(100);
+    for (String w : closestWords)
       levDists.put(w, levenshtein.distance(word, w));
 
-    return withMostCommonTrigrams.stream().sorted((a, b) -> levDists.get(a).compareTo(levDists.get(b)))
-        .collect(Collectors.toList());
+    closestWords.sort((a, b) -> levDists.get(a).compareTo(levDists.get(b)));
+    return closestWords;
   }
 
   private String transformForTrigrams(String word) {
