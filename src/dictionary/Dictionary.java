@@ -140,8 +140,10 @@ public class Dictionary {
     word = word.toLowerCase();
     word = word.replace("é", "e");
     word = word.replace("è", "e");
+    word = word.replace("ë", "e");
     word = word.replace("û", "u");
     word = word.replace("ô", "o");
+    word = word.replace("î", "i");
     word = "<" + word + ">";
     return word;
   }
