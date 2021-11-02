@@ -31,6 +31,10 @@ public class FautesTxt {
     for (int I = 0; I < threads.length; I++) {
       final int i = I;
       final double n = (double) misspelledWords.length / threads.length;
+
+      // SAFETY: No concurrency because each index in correctedWords will only be
+      // written on by one thread. There is no concurrent writing in misspelledWords
+      // so reading will not be a problem either.
       threads[i] = new Thread(() -> {
         for (int j = (int) (n * i); j < n * (i + 1); j++)
           correctedWords[j] = dictionary.closestWords(misspelledWords[j]);
