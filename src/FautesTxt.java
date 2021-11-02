@@ -9,6 +9,10 @@ import dictionary.Dictionary;
 import levenshtein.Levenshtein;
 import levenshtein.TwoRowsLevenshtein;
 
+/**
+ * This is more for fun than benchmarking (it uses multithreading)
+ */
+
 public class FautesTxt {
   public static void main(String[] args) throws IOException, InterruptedException {
     String[] misspelledWords = Files.lines(new File("assets/fautes.txt").toPath()).toArray(String[]::new);

@@ -14,7 +14,24 @@ import java.util.Set;
 import levenshtein.Levenshtein;
 
 public class Dictionary {
+  /**
+   * This is used to check if the word is in the dictionary in O(1) (in practice).
+   */
   private Set<String> words = new HashSet<String>(100000);
+  /**
+   * We index the words by their trigrams AND their length. In older commits this
+   * is only a Map<String, List<String>.
+   * 
+   * This decision was made because during the first selection by trigrams, we had
+   * to count occurences for thousands to hundred of thousands of words which was
+   * a huge bottleneck. Very long words are always favored since they are more
+   * likely to have common trigrams, even tho their levenshtein distance will be
+   * very high if the mispelled word is short.
+   * 
+   * So, instead of first selecting and counting occurences of all words with
+   * common trigrams, We count occurences of all words with common trigrams AND a
+   * length close to the mispelled word.
+   */
   private Map<String, Map<Integer, List<String>>> trigramMap = new HashMap<>(100000);
 
   private Levenshtein levenshtein;
@@ -24,8 +41,9 @@ public class Dictionary {
     while (scanner.hasNext()) {
       String word = scanner.next();
       words.add(word);
-      var trigramWord = transformForTrigrams(word);
 
+      // Index by trigrams
+      var trigramWord = transformForTrigrams(word);
       for (int i = 0; i < trigramWord.length() - 2; i++) {
         String trigram = trigramWord.substring(i, i + 3);
         if (trigramMap.containsKey(trigram)) {
@@ -57,8 +75,9 @@ public class Dictionary {
   public List<String> closestWords(String word) {
     var trigramWord = transformForTrigrams(word);
 
-    // We count how many common trigrams there are between the word and those in the
-    // dictionary
+    // We select words with common trigrams and a close length
+    // And we count the number of occurences of each word
+
     Map<String, Integer> trigramOccs = new HashMap<>(64000);
     for (int i = 0; i < trigramWord.length() - 2; i++) {
       String trigram = trigramWord.substring(i, i + 3);
@@ -78,12 +97,13 @@ public class Dictionary {
     }
 
     // We select the words that have the most trigrams in common
-    final int MCTSelectionCount = 100;
-    Queue<String> withMostCommonTrigrams = new PriorityQueue<>(MCTSelectionCount,
+
+    final int MCT_SELECTION_COUNT = 100;
+    Queue<String> withMostCommonTrigrams = new PriorityQueue<>(MCT_SELECTION_COUNT,
         (a, b) -> trigramOccs.get(a).compareTo(trigramOccs.get(b)));
 
     for (String w : trigramOccs.keySet()) {
-      if (withMostCommonTrigrams.size() < MCTSelectionCount) {
+      if (withMostCommonTrigrams.size() < MCT_SELECTION_COUNT) {
         withMostCommonTrigrams.add(w);
       } else {
         String min = withMostCommonTrigrams.peek();
@@ -96,16 +116,22 @@ public class Dictionary {
 
     List<String> closestWords = new ArrayList<>(withMostCommonTrigrams);
 
-    // We compute the levenshtein distance for each selected word
-    Map<String, Integer> levDists = new HashMap<>(MCTSelectionCount);
+    // We memoize the levenshtein distance for each selected word
+
+    Map<String, Integer> levDists = new HashMap<>(MCT_SELECTION_COUNT);
     word = transformForLev(word);
     for (String w : closestWords)
       levDists.put(w, levenshtein.distance(word, transformForLev(w)));
 
+    // And finally, we sort by levenshtein distance
     closestWords.sort(Comparator.comparing(levDists::get));
     return closestWords;
   }
 
+  /**
+   * Solves problems for words like "soeur". "sœur" wouldn't even pass the first
+   * selection by common trigrams since they have only one common trigram "ur>".
+   */
   private String transformForTrigrams(String word) {
     word = transformForLev(word);
     word = word.toLowerCase();
@@ -117,6 +143,11 @@ public class Dictionary {
     return word;
   }
 
+  /**
+   * Solves problems for words like "soeur". "sœur" and "soeur" have a levenshtein
+   * edit distance of 2 even thought they are really close, because "oe" is merged
+   * in one character
+   */
   private String transformForLev(String word) {
     word = word.replace("œ", "oe");
     return word;
