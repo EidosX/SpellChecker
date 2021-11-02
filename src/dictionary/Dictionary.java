@@ -133,6 +133,9 @@ public class Dictionary {
    * selection by common trigrams since they have only one common trigram "ur>".
    */
   private String transformForTrigrams(String word) {
+    // Note: this was measured to be negligeable performance wise.
+    // Adding < and > makes the algorithm quite slower, but it's only because it
+    // makes the words longer, not because of the string transformations
     word = transformForLev(word);
     word = word.toLowerCase();
     word = word.replace("é", "e");

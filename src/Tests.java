@@ -26,10 +26,8 @@ public class Tests {
 
     timer(1, () -> {
       for (String word : misspelledWords) {
-        if (!dictionary.exists(word)) {
-          var xs = dictionary.closestWords(word);
-          // System.out.println(word + " -> " + xs.subList(0, Math.min(5, xs.size())));
-        }
+        var xs = dictionary.closestWords(word);
+        // System.out.println(word + " -> " + xs.subList(0, Math.min(5, xs.size())));
       }
     }, "fautes.txt Correction");
   }

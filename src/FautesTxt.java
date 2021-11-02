@@ -24,7 +24,7 @@ public class FautesTxt {
 
     @SuppressWarnings("unchecked")
     List<String>[] correctedWords = new List[misspelledWords.length];
-    Thread[] threads = new Thread[12];
+    Thread[] threads = new Thread[20];
 
     long t = System.nanoTime();
 
