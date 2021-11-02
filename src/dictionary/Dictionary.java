@@ -15,7 +15,7 @@ import levenshtein.Levenshtein;
 
 public class Dictionary {
   private Set<String> words = new HashSet<String>(100000);
-  private Map<String, List<String>> trigramMap = new HashMap<>(100000);
+  private Map<String, Map<Integer, List<String>>> trigramMap = new HashMap<>(100000);
 
   private Levenshtein levenshtein;
 
@@ -29,12 +29,14 @@ public class Dictionary {
       for (int i = 0; i < trigramWord.length() - 2; i++) {
         String trigram = trigramWord.substring(i, i + 3);
         if (trigramMap.containsKey(trigram)) {
-          trigramMap.get(trigram).add(word);
+          trigramMap.get(trigram).compute(word.length(), (k, v) -> v == null ? new ArrayList<>() : v).add(word);
         } else {
-          ArrayList<String> ws = new ArrayList<>(16);
+          ArrayList<String> ws = new ArrayList<>(8);
           ws.ensureCapacity(16);
           ws.add(word);
-          trigramMap.put(trigram, ws);
+          Map<Integer, List<String>> map = new HashMap<>(8);
+          map.put(word.length(), ws);
+          trigramMap.put(trigram, map);
         }
       }
     }
@@ -60,11 +62,18 @@ public class Dictionary {
     Map<String, Integer> trigramOccs = new HashMap<>(64000);
     for (int i = 0; i < trigramWord.length() - 2; i++) {
       String trigram = trigramWord.substring(i, i + 3);
-      List<String> matchingWithTrigram = trigramMap.get(trigram);
+      Map<Integer, List<String>> matchingWithTrigram = trigramMap.get(trigram);
       if (matchingWithTrigram == null)
         continue;
-      for (String w : matchingWithTrigram) {
-        trigramOccs.compute(w, (s, n) -> n == null ? 1 : n + 1);
+      final int MAX_LENGTH_DIFF = 1;
+      for (int j = Math.max(0, word.length() - MAX_LENGTH_DIFF); j <= word.length() + MAX_LENGTH_DIFF; ++j) {
+        List<String> matchingWithLength = matchingWithTrigram.get(j);
+        if (matchingWithLength == null)
+          continue;
+
+        for (String w : matchingWithLength) {
+          trigramOccs.compute(w, (s, n) -> n == null ? 1 : n + 1);
+        }
       }
     }
 
